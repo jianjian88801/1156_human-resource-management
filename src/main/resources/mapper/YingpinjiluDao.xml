@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YingpinjiluDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zhaopinxinxi_id as zhaopinxinxiId
+        ,a.yingpinjilu_name as yingpinjiluName
+        ,a.yingpinjilu_phone as yingpinjiluPhone
+        ,a.yingpinjilu_id_number as yingpinjiluIdNumber
+        ,a.jiaoyu_content as jiaoyuContent
+        ,a.gongzuo_content as gongzuoContent
+        ,a.geren_content as gerenContent
+        ,a.yingpin_time as yingpinTime
+        ,a.mianshi_types as mianshiTypes
+        ,a.mianshi_jieguo_types as mianshiJieguoTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YingpinjiluView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,zhaopinxinxi.zhaopinxinxi_name as zhaopinxinxiName
+        ,zhaopinxinxi.zhaopinxinxi_types as zhaopinxinxiTypes
+        ,zhaopinxinxi.zhaopinxinxi_number as zhaopinxinxiNumber
+        ,zhaopinxinxi.zhaopinxinxi_content as zhaopinxinxiContent
+
+        FROM yingpinjilu  a
+        left JOIN zhaopinxinxi zhaopinxinxi ON a.zhaopinxinxi_id = zhaopinxinxi.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.zhaopinxinxiId != null and params.zhaopinxinxiId != ''">
+                and (
+                    a.zhaopinxinxi_id = #{params.zhaopinxinxiId}
+                )
+            </if>
+            <if test=" params.yingpinjiluName != '' and params.yingpinjiluName != null and params.yingpinjiluName != 'null' ">
+                and a.yingpinjilu_name like CONCAT('%',#{params.yingpinjiluName},'%')
+            </if>
+            <if test=" params.yingpinjiluPhone != '' and params.yingpinjiluPhone != null and params.yingpinjiluPhone != 'null' ">
+                and a.yingpinjilu_phone like CONCAT('%',#{params.yingpinjiluPhone},'%')
+            </if>
+            <if test=" params.yingpinjiluIdNumber != '' and params.yingpinjiluIdNumber != null and params.yingpinjiluIdNumber != 'null' ">
+                and a.yingpinjilu_id_number like CONCAT('%',#{params.yingpinjiluIdNumber},'%')
+            </if>
+            <if test=" params.jiaoyuContent != '' and params.jiaoyuContent != null and params.jiaoyuContent != 'null' ">
+                and a.jiaoyu_content like CONCAT('%',#{params.jiaoyuContent},'%')
+            </if>
+            <if test=" params.gongzuoContent != '' and params.gongzuoContent != null and params.gongzuoContent != 'null' ">
+                and a.gongzuo_content like CONCAT('%',#{params.gongzuoContent},'%')
+            </if>
+            <if test=" params.gerenContent != '' and params.gerenContent != null and params.gerenContent != 'null' ">
+                and a.geren_content like CONCAT('%',#{params.gerenContent},'%')
+            </if>
+            <if test=" params.yingpinTimeStart != '' and params.yingpinTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yingpin_time) >= UNIX_TIMESTAMP(#{params.yingpinTimeStart}) ]]>
+            </if>
+            <if test=" params.yingpinTimeEnd != '' and params.yingpinTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yingpin_time) <= UNIX_TIMESTAMP(#{params.yingpinTimeEnd}) ]]>
+            </if>
+            <if test="params.mianshiTypes != null and params.mianshiTypes != ''">
+                and a.mianshi_types = #{params.mianshiTypes}
+            </if>
+            <if test="params.mianshiJieguoTypes != null and params.mianshiJieguoTypes != ''">
+                and a.mianshi_jieguo_types = #{params.mianshiJieguoTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断招聘信息的id不为空 -->
+            <if test=" params.zhaopinxinxiIdNotNull != '' and params.zhaopinxinxiIdNotNull != null and params.zhaopinxinxiIdNotNull != 'null' ">
+                and a.zhaopinxinxi_id IS NOT NULL
+            </if>
+            <if test=" params.zhaopinxinxiName != '' and params.zhaopinxinxiName != null and params.zhaopinxinxiName != 'null' ">
+                and zhaopinxinxi.zhaopinxinxi_name like CONCAT('%',#{params.zhaopinxinxiName},'%')
+            </if>
+            <if test="params.zhaopinxinxiTypes != null  and params.zhaopinxinxiTypes != ''">
+                and zhaopinxinxi.zhaopinxinxi_types = #{params.zhaopinxinxiTypes}
+            </if>
+
+            <if test="params.zhaopinxinxiNumberStart != null  and params.zhaopinxinxiNumberStart != '' ">
+                <![CDATA[  and zhaopinxinxi.zhaopinxinxi_number >= #{params.zhaopinxinxiNumberStart}   ]]>
+            </if>
+            <if test="params.zhaopinxinxiNumberEnd != null  and params.zhaopinxinxiNumberEnd != '' ">
+                <![CDATA[  and zhaopinxinxi.zhaopinxinxi_number <= #{params.zhaopinxinxiNumberEnd}   ]]>
+            </if>
+            <if test="params.zhaopinxinxiNumber != null  and params.zhaopinxinxiNumber != '' ">
+                and zhaopinxinxi.zhaopinxinxi_number = #{params.zhaopinxinxiNumber}
+            </if>
+            <if test=" params.zhaopinxinxiContent != '' and params.zhaopinxinxiContent != null and params.zhaopinxinxiContent != 'null' ">
+                and zhaopinxinxi.zhaopinxinxi_content like CONCAT('%',#{params.zhaopinxinxiContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zhaopinxinxi.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zhaopinxinxi.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
